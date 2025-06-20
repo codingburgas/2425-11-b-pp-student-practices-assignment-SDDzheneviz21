@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-calculator text-primary me-2"></i>
+                        Calculate Calories Burned
+                    </h2>
+                    <form method="POST" action="{{ url_for('main.predict') }}">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-clock text-primary me-2"></i>
+                                {{ form.workout_duration.label }}
+                            </label>
+                            {{ form.workout_duration(class="form-control", placeholder="Enter duration in minutes") }}
+                            {% if form.workout_duration.errors %}
+                            <div class="text-danger">
+                                {% for error in form.workout_duration.errors %}
+                                <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Enter your workout duration in minutes (e.g., 30 for 30 minutes)</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-heartbeat text-primary me-2"></i>
+                                {{ form.heart_rate.label }}
+                            </label>
+                            {{ form.heart_rate(class="form-control", placeholder="Enter your average heart rate") }}
+                            {% if form.heart_rate.errors %}
+                            <div class="text-danger">
+                                {% for error in form.heart_rate.errors %}
+                                <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Enter your average heart rate during the workout (beats per minute)</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-user-alt text-primary me-2"></i>
+                                {{ form.age.label }}
+                            </label>
+                            {{ form.age(class="form-control", placeholder="Enter your age") }}
+                            {% if form.age.errors %}
+                            <div class="text-danger">
+                                {% for error in form.age.errors %}
+                                <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Enter your age</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-weight text-primary me-2"></i>
+                                {{ form.weight.label }}
+                            </label>
+                            {{ form.weight(class="form-control", placeholder="Enter your weight in kg") }}
+                            {% if form.weight.errors %}
+                            <div class="text-danger">
+                                {% for error in form.weight.errors %}
+                                <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Enter your weight in kilograms</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-venus-mars text-primary me-2"></i>
+                                {{ form.gender.label }}
+                            </label>
+                            {{ form.gender(class="form-control") }}
+                            {% if form.gender.errors %}
+                            <div class="text-danger">
+                                {% for error in form.gender.errors %}
+                                <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Select your gender</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-eye text-primary me-2"></i>
+                                {{ form.is_public.label }}
+                            </label>
+                            {{ form.is_public(class="form-check-input") }}
+                            <small class="form-text text-muted">Make this prediction public</small>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-fire me-2"></i>Calculate Calories
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h3 class="card-title text-center mb-3">
+                        <i class="fas fa-info-circle text-primary me-2"></i>
+                        How to Get Accurate Results
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-clock text-primary me-2"></i>Workout Duration</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>Measure total active time</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Include warm-up and cool-down</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Convert to minutes</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-heartbeat text-primary me-2"></i>Heart Rate</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>Use average heart rate</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Measure during peak activity</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Use a heart rate monitor</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if prediction_result is not none %}
+    <div class="card mt-4">
+        <div class="card-body text-center">
+            <h4 class="mb-3">Your Predicted Calories Burned:</h4>
+            <h2 class="text-success">{{ '%.2f'|format(prediction_result) }} kcal</h2>
+            {% if diagram_url %}
+            <div class="mt-4">
+                <h5>Input Features Diagram</h5>
+                <img src="{{ diagram_url }}" alt="Input Features Diagram" class="img-fluid" style="max-width:400px;">
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

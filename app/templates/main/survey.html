@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h1>User Survey</h1>
+        <div class="card">
+            <div class="card-body">
+                <p class="lead">Your feedback helps us improve our AI prediction system!</p>
+                {{ wtf.quick_form(form) }}
+            </div>
+        </div>
+        <div class="mt-4">
+            <h4>Why your feedback matters:</h4>
+            <ul>
+                <li>Helps us understand user needs and preferences</li>
+                <li>Guides future feature development</li>
+                <li>Improves the accuracy of our predictions</li>
+                <li>Enhances the overall user experience</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %} 

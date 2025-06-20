@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center mb-5">
+            <h1 class="display-4 mb-4">Welcome to CalorieBurn AI</h1>
+            <p class="lead">Your intelligent companion for tracking and predicting calories burned during workouts</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-calculator fa-3x mb-3 text-primary"></i>
+                    <h3 class="card-title">Smart Calculator</h3>
+                    <p class="card-text">Calculate calories burned based on workout duration and heart rate using our advanced AI model.</p>
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('main.predict') }}" class="btn btn-primary">Calculate Now</a>
+                    {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login to Start</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-history fa-3x mb-3 text-primary"></i>
+                    <h3 class="card-title">Track Progress</h3>
+                    <p class="card-text">View your workout history and track your fitness journey over time.</p>
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('main.predictions') }}" class="btn btn-primary">View History</a>
+                    {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login to View</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-clipboard-list fa-3x mb-3 text-primary"></i>
+                    <h3 class="card-title">Fitness Survey</h3>
+                    <p class="card-text">Help us improve our predictions by participating in our fitness survey.</p>
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('main.survey') }}" class="btn btn-primary">Take Survey</a>
+                    {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login to Participate</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="text-center mb-4">How It Works</h2>
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <i class="fas fa-user-plus fa-2x mb-3 text-primary"></i>
+                            <h4>1. Create Account</h4>
+                            <p>Sign up for free to access all features</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <i class="fas fa-heartbeat fa-2x mb-3 text-primary"></i>
+                            <h4>2. Input Data</h4>
+                            <p>Enter your workout duration and heart rate</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <i class="fas fa-chart-line fa-2x mb-3 text-primary"></i>
+                            <h4>3. Get Results</h4>
+                            <p>Receive accurate calorie burn predictions</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
