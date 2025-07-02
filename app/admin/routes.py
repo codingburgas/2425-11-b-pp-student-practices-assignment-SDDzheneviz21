@@ -5,6 +5,11 @@ from app.admin import bp
 from app.models.user import User, UserProfile
 from app.models.ai_model import Prediction, Survey
 from app.admin.forms import EditUserForm
+from app.models.ml_utils import train_logistic_regression, calculate_metrics, calculate_information_gain
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+import seaborn as sns
 
 def admin_required(f):
     def decorated_function(*args, **kwargs):
@@ -78,4 +83,69 @@ def delete_survey(id):
     db.session.delete(survey)
     db.session.commit()
     flash('Survey has been deleted.')
-    return redirect(url_for('admin.dashboard')) 
+    return redirect(url_for('admin.dashboard'))
+
+@bp.route('/metrics')
+@login_required
+@admin_required
+def metrics():
+    # Вземи всички предсказания
+    predictions = Prediction.query.all()
+    if not predictions or len(predictions) < 5:
+        flash('Not enough data for metrics calculation.')
+        return redirect(url_for('admin.dashboard'))
+    # Подготви X и y
+    feature_names = ['workout_duration', 'heart_rate', 'age', 'weight', 'gender']
+    X = []
+    y = []
+    threshold = 200  # примерен праг за бинарна класификация
+    for p in predictions:
+        d = p.input_data
+        gender_num = 1 if d.get('gender') == 'male' else 0
+        X.append([
+            d.get('workout_duration', 0),
+            d.get('heart_rate', 0),
+            d.get('age', 0),
+            d.get('weight', 0),
+            gender_num
+        ])
+        y.append(1 if p.prediction_result >= threshold else 0)
+    X = np.array(X)
+    y = np.array(y)
+    # Тренирай модел и изчисли метриките
+    model = train_logistic_regression(X, y)
+    metrics = calculate_metrics(model, X, y)
+    info_gain = calculate_information_gain(X, y, feature_names)
+
+    # --- Generate static images ---
+    diagram_path = os.path.join('app', 'static', 'diagrams')
+    os.makedirs(diagram_path, exist_ok=True)
+    # Confusion matrix image
+    cm = np.array(metrics['confusion_matrix'])
+    plt.figure(figsize=(4,4))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=True,
+                xticklabels=['Predicted ≤ 200 calories', 'Predicted > 200 calories'],
+                yticklabels=['Burned ≤ 200 calories', 'Burned > 200 calories'])
+    plt.title('Confusion Matrix')
+    plt.ylabel('Actual')
+    plt.xlabel('Predicted')
+    cm_filename = 'confusion_matrix.png'
+    plt.tight_layout()
+    plt.savefig(os.path.join(diagram_path, cm_filename))
+    plt.close()
+    # Information gain bar chart
+    plt.figure(figsize=(6,4))
+    ig_values = [info_gain[f] for f in feature_names]
+    plt.bar(feature_names, ig_values, color='skyblue')
+    plt.title('Information Gain by Feature')
+    plt.xlabel('Feature')
+    plt.ylabel('Info Gain')
+    plt.tight_layout()
+    ig_filename = 'info_gain.png'
+    plt.savefig(os.path.join(diagram_path, ig_filename))
+    plt.close()
+    # URLs for template
+    cm_url = url_for('static', filename=f'diagrams/{cm_filename}')
+    ig_url = url_for('static', filename=f'diagrams/{ig_filename}')
+
+    return render_template('admin/metrics.html', title='Model Metrics', metrics=metrics, info_gain=info_gain, feature_names=feature_names, cm_url=cm_url, ig_url=ig_url) 

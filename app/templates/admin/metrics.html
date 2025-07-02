@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+  .metrics-card {
+    margin-bottom: 2.5rem;
+    padding: 2rem 1.5rem 2.5rem 1.5rem;
+    border-radius: 1rem;
+  }
+  .metrics-card h2, .metrics-card h3 {
+    margin-bottom: 2rem;
+  }
+  .metrics-card img {
+    display: block;
+    margin: 0 auto 1.5rem auto;
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  }
+</style>
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow metrics-card">
+        <div class="card-body">
+          <h2 class="card-title text-center mb-4">Model Metrics</h2>
+          <ul class="list-group list-group-flush mb-4">
+            <li class="list-group-item"><b>Logloss (Entropy):</b> {{ metrics.logloss }}</li>
+            <li class="list-group-item"><b>Precision:</b> {{ metrics.precision }}</li>
+            <li class="list-group-item"><b>Recall:</b> {{ metrics.recall }}</li>
+            <li class="list-group-item"><b>F1-Score:</b> {{ metrics.f1 }}</li>
+            <li class="list-group-item"><b>Accuracy:</b> {{ metrics.accuracy }}</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card shadow metrics-card">
+        <div class="card-body">
+          <h3 class="card-title text-center mb-4">Confusion Matrix</h3>
+          <img src="{{ cm_url }}" alt="Confusion Matrix" />
+        </div>
+      </div>
+      <div class="card shadow metrics-card">
+        <div class="card-body">
+          <h3 class="card-title text-center mb-4">Information Gain (Mutual Information)</h3>
+          <img src="{{ ig_url }}" alt="Information Gain by Feature" />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} 
