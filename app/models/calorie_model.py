@@ -28,10 +28,10 @@ class CaloriePredictionModel:
         # Load datasets
         calories_df = pd.read_csv('calories.csv')
         exercise_df = pd.read_csv('exercise.csv')
-        
+        exercise_df.drop(columns=['Weight', 'Height','Gender','Age','Duration'])
         # Merge datasets
         merged_df = pd.merge(exercise_df, calories_df, on='User_ID', how='inner')
-        
+        self.merged_df = merged_df
         # Preprocess data
         df_processed = merged_df.copy()
         
@@ -42,7 +42,6 @@ class CaloriePredictionModel:
         # Prepare features and target
         X = df_processed[self.feature_columns]
         y = df_processed['Calories']
-        
         # Split data
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=0.2, random_state=42
@@ -174,7 +173,7 @@ class CaloriePredictionModel:
 
 # Global model instance
 calorie_model = CaloriePredictionModel()
-
+calorie_model.train_and_save_model()
 def initialize_calorie_model():
     """
     Initialize the calorie prediction model
