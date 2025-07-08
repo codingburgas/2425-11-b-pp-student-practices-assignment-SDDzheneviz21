@@ -4,6 +4,8 @@ from flask_login import LoginManager
 from flask_bootstrap import Bootstrap
 from flask_migrate import Migrate
 from config import Config
+# from app.main.routes import to_bulgarian_time  # Премахнато, за да няма цикличен импорт
+from app.utils.time_utils import to_bulgarian_time
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -35,6 +37,18 @@ def create_app(config_class=Config):
     # Create database tables
     with app.app_context():
         db.create_all()
+
+    # Register Jinja2 filter
+    app.jinja_env.filters['to_bulgarian_time'] = to_bulgarian_time
+
+    # Initialize ML model
+    with app.app_context():
+        try:
+            from app.models.calorie_model import initialize_calorie_model
+            initialize_calorie_model()
+            print("ML model initialized successfully!")
+        except Exception as e:
+            print(f"Warning: Could not initialize ML model: {e}")
 
     return app
 

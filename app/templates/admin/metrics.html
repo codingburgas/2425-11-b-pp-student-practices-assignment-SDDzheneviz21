@@ -26,10 +26,10 @@
           <h2 class="card-title text-center mb-4">Model Metrics</h2>
           <ul class="list-group list-group-flush mb-4">
             <li class="list-group-item"><b>Logloss (Entropy):</b> {{ metrics.logloss }}</li>
-            <li class="list-group-item"><b>Precision:</b> {{ metrics.precision }}</li>
-            <li class="list-group-item"><b>Recall:</b> {{ metrics.recall }}</li>
-            <li class="list-group-item"><b>F1-Score:</b> {{ metrics.f1 }}</li>
-            <li class="list-group-item"><b>Accuracy:</b> {{ metrics.accuracy }}</li>
+            <li class="list-group-item"><b>Precision:</b> {{ (metrics.precision * 100)|round(1) }}%</li>
+            <li class="list-group-item"><b>Recall:</b> {{ (metrics.recall * 100)|round(1) }}%</li>
+            <li class="list-group-item"><b>F1-Score:</b> {{ (metrics.f1 * 100)|round(1) }}%</li>
+            <li class="list-group-item"><b>Accuracy:</b> {{ (metrics.accuracy * 100)|round(1) }}%</li>
           </ul>
         </div>
       </div>
@@ -37,12 +37,6 @@
         <div class="card-body">
           <h3 class="card-title text-center mb-4">Confusion Matrix</h3>
           <img src="{{ cm_url }}" alt="Confusion Matrix" />
-        </div>
-      </div>
-      <div class="card shadow metrics-card">
-        <div class="card-body">
-          <h3 class="card-title text-center mb-4">Information Gain (Mutual Information)</h3>
-          <img src="{{ ig_url }}" alt="Information Gain by Feature" />
         </div>
       </div>
     </div>

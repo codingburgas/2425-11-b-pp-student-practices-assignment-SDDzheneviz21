@@ -79,6 +79,38 @@
 
                         <div class="mb-4">
                             <label class="form-label">
+                                <i class="fas fa-ruler-vertical text-primary me-2"></i>
+                                {{ form.height.label }}
+                            </label>
+                            {{ form.height(class="form-control", placeholder="Enter your height in cm") }}
+                            {% if form.height.errors %}
+                            <div class="text-danger">
+                                {% for error in form.height.errors %}
+                                <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Enter your height in centimeters</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-thermometer-half text-primary me-2"></i>
+                                {{ form.body_temp.label }}
+                            </label>
+                            {{ form.body_temp(class="form-control", placeholder="Enter your body temperature") }}
+                            {% if form.body_temp.errors %}
+                            <div class="text-danger">
+                                {% for error in form.body_temp.errors %}
+                                <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Enter your body temperature in Celsius (e.g., 37.0)</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">
                                 <i class="fas fa-venus-mars text-primary me-2"></i>
                                 {{ form.gender.label }}
                             </label>
@@ -144,12 +176,78 @@
         <div class="card-body text-center">
             <h4 class="mb-3">Your Predicted Calories Burned:</h4>
             <h2 class="text-success">{{ '%.2f'|format(prediction_result) }} kcal</h2>
-            {% if diagram_url %}
-            <div class="mt-4">
-                <h5>Input Features Diagram</h5>
-                <img src="{{ diagram_url }}" alt="Input Features Diagram" class="img-fluid" style="max-width:400px;">
+            <div class="row mt-4 justify-content-center">
+                <div class="col-md-6 mb-4 mb-md-0">
+                    <h5>Input Features Diagram</h5>
+                    {% if diagram_url %}
+                    <img src="{{ diagram_url }}" alt="Input Features Diagram" class="img-fluid" style="max-width:400px;">
+                    {% endif %}
+                </div>
+                {% if probability is not none %}
+                <div class="col-md-6">
+                    <h5>Probability Output</h5>
+                    <div class="mb-2">
+                        <span class="fw-bold">Вероятност да изгорите над 200 kcal:</span>
+                        <span class="text-primary">{{ (probability*100)|round(1) }}%</span>
+                    </div>
+                    <div id="probability-bar" style="max-width:400px; margin: 0 auto;"></div>
+                    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+                    <script>
+                    var proba = {{ probability|tojson }};
+                    var data = [{
+                        x: ['> 200 kcal', '≤ 200 kcal'],
+                        y: [proba*100, (1-proba)*100],
+                        type: 'bar',
+                        marker: {color: ['#007bff', '#e0e0e0']}
+                    }];
+                    var layout = {
+                        title: 'Probability Distribution',
+                        yaxis: {title: 'Probability (%)', range: [0, 100]},
+                        xaxis: {title: ''},
+                        template: 'plotly_white',
+                        margin: { t: 60 }
+                    };
+                    Plotly.newPlot('probability-bar', data, layout, {displayModeBar: false, responsive: true});
+                    </script>
+                </div>
+                {% endif %}
             </div>
-            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if feature_importance %}
+    <div class="card mt-4">
+        <div class="card-body">
+            <h4 class="text-center mb-3">
+                <i class="fas fa-chart-bar text-primary me-2"></i>
+                Feature Importance Analysis
+            </h4>
+            <p class="text-center text-muted mb-4">
+                This shows which factors most influence calorie burn predictions in our ML model
+            </p>
+            <div class="row">
+                {% for feature, importance in feature_importance %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">{{ feature.replace('_', ' ').title() }}</h6>
+                            <div class="progress mb-2">
+                                <div class="progress-bar bg-primary" 
+                                     role="progressbar" 
+                                     style="width: {{ (importance / feature_importance[0][1] * 100)|round(1) }}%"
+                                     aria-valuenow="{{ (importance / feature_importance[0][1] * 100)|round(1) }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                    {{ (importance / feature_importance[0][1] * 100)|round(1) }}%
+                                </div>
+                            </div>
+                            <small class="text-muted">Importance: {{ importance|round(3) }}</small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
     {% endif %}

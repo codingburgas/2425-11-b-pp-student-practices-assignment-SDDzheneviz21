@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')
 from flask import render_template, flash, redirect, url_for, request
 from flask_login import login_required, current_user
 from app import db
@@ -5,7 +7,7 @@ from app.admin import bp
 from app.models.user import User, UserProfile
 from app.models.ai_model import Prediction, Survey
 from app.admin.forms import EditUserForm
-from app.models.ml_utils import train_logistic_regression, calculate_metrics, calculate_information_gain
+from app.models.ml_utils import train_logistic_regression, calculate_metrics
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -36,6 +38,7 @@ def dashboard():
 @bp.route('/user/<int:id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
+
 def edit_user(id):
     user = User.query.get_or_404(id)
     form = EditUserForm()
@@ -115,7 +118,6 @@ def metrics():
     # Тренирай модел и изчисли метриките
     model = train_logistic_regression(X, y)
     metrics = calculate_metrics(model, X, y)
-    info_gain = calculate_information_gain(X, y, feature_names)
 
     # --- Generate static images ---
     diagram_path = os.path.join('app', 'static', 'diagrams')
@@ -133,19 +135,48 @@ def metrics():
     plt.tight_layout()
     plt.savefig(os.path.join(diagram_path, cm_filename))
     plt.close()
-    # Information gain bar chart
-    plt.figure(figsize=(6,4))
-    ig_values = [info_gain[f] for f in feature_names]
-    plt.bar(feature_names, ig_values, color='skyblue')
-    plt.title('Information Gain by Feature')
-    plt.xlabel('Feature')
-    plt.ylabel('Info Gain')
-    plt.tight_layout()
-    ig_filename = 'info_gain.png'
-    plt.savefig(os.path.join(diagram_path, ig_filename))
-    plt.close()
     # URLs for template
     cm_url = url_for('static', filename=f'diagrams/{cm_filename}')
-    ig_url = url_for('static', filename=f'diagrams/{ig_filename}')
 
-    return render_template('admin/metrics.html', title='Model Metrics', metrics=metrics, info_gain=info_gain, feature_names=feature_names, cm_url=cm_url, ig_url=ig_url) 
+    return render_template('admin/metrics.html', title='Model Metrics', metrics=metrics, cm_url=cm_url)
+
+@bp.route('/prediction/<int:id>')
+@login_required
+@admin_required
+def view_prediction(id):
+    prediction = Prediction.query.get_or_404(id)
+    # Подготви данните за диаграмата
+    input_data = prediction.input_data
+    diagram_url = None
+    diagram_filename = f'diagram_{prediction.id}.png'
+    diagram_path = os.path.join('app', 'static', 'diagrams', diagram_filename)
+    if os.path.exists(diagram_path):
+        diagram_url = url_for('static', filename=f'diagrams/{diagram_filename}')
+    # --- ML вероятностен изход ---
+    from app.models.ai_model import Prediction as PredictionModel
+    predictions = PredictionModel.query.all()
+    probability = None
+    if predictions and len(predictions) >= 5:
+        feature_names = ['workout_duration', 'heart_rate', 'age', 'weight', 'gender']
+        X = []
+        y = []
+        threshold = 200
+        for p in predictions:
+            d = p.input_data
+            gender_num = 1 if d.get('gender') == 'male' else 0
+            X.append([
+                d.get('workout_duration', 0),
+                d.get('heart_rate', 0),
+                d.get('age', 0),
+                d.get('weight', 0),
+                gender_num
+            ])
+            y.append(1 if p.prediction_result >= threshold else 0)
+        X = np.array(X)
+        y = np.array(y)
+        model = train_logistic_regression(X, y)
+        gender_num = 1 if input_data.get('gender') == 'male' else 0
+        input_vec = np.array([[input_data.get('workout_duration', 0), input_data.get('heart_rate', 0), input_data.get('age', 0), input_data.get('weight', 0), gender_num]])
+        proba = model.predict_proba(input_vec)[0][1]
+        probability = proba
+    return render_template('admin/view_prediction.html', prediction=prediction, diagram_url=diagram_url, probability=probability) 

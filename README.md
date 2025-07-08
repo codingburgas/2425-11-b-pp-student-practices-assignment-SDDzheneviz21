@@ -1,56 +1,44 @@
-# AI Prediction System
+# Система за AI Предсказване на Калории
 
-A Flask-based web application that allows users to make predictions using an AI model and participate in surveys to improve the system.
+Уеб приложение с Flask за предсказване на изгорени калории чрез машинно обучение, с потребителски и администраторски панел, визуализации и метрики.
 
-## Features
+## Основни функционалности
+- Регистрация и вход на потребители
+- Потребителски профили
+- Предсказване на изгорени калории според въведени данни
+- Възможност за публични/частни предсказания
+- Админ панел с преглед на всички предсказания и ML метрики
+- Визуализации на входни данни и резултати
+- Анкети за обратна връзка
 
-- User authentication (login/register)
-- User roles (admin/regular user)
-- AI prediction system
-- User surveys
-- Admin dashboard
-- Public/private predictions
-- User profiles
-
-## Requirements
-
-- Python 3.8+
-- Flask and its extensions
-- SQLite database
-
-## Installation
-
-1. Clone the repository:
+## Инсталация
+1. Клонирай репото:
 ```bash
 git clone <repository-url>
 cd <repository-name>
 ```
-
-2. Create a virtual environment and activate it:
+2. Създай виртуална среда и я активирай:
 ```bash
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 ```
-
-3. Install the required packages:
+3. Инсталирай зависимостите:
 ```bash
 pip install -r requirements.txt
 ```
-
-4. Initialize the database:
+4. Инициализирай базата:
 ```bash
 flask db init
 flask db migrate
 flask db upgrade
 ```
-
-5. Create an admin user:
+5. Създай админ потребител:
 ```bash
 flask shell
 >>> from app import db
 >>> from app.models.user import User, UserProfile
 >>> admin = User(username='admin', email='admin@example.com', is_admin=True)
->>> admin.set_password('your-password')
+>>> admin.set_password('парола')
 >>> profile = UserProfile(user=admin)
 >>> db.session.add(admin)
 >>> db.session.add(profile)
@@ -58,67 +46,67 @@ flask shell
 >>> exit()
 ```
 
-## Running the Application
-
-1. Start the Flask development server:
+## Стартиране
 ```bash
 flask run
 ```
+Отвори http://localhost:5000
 
-2. Open your web browser and navigate to `http://localhost:5000`
-
-## Project Structure
-
+## Структура на проекта
 ```
 project/
 ├── app/
 │   ├── __init__.py
-│   ├── models/
-│   ├── static/
-│   ├── templates/
-│   ├── auth/
-│   ├── main/
-│   └── admin/
+│   ├── models/         # Модели и ML логика
+│   ├── static/         # CSS, диаграми
+│   ├── templates/      # HTML шаблони
+│   ├── auth/           # Автентикация
+│   ├── main/           # Основни потребителски функции
+│   └── admin/          # Админ панел
 ├── config.py
 ├── requirements.txt
 └── run.py
 ```
 
-## Usage
+## Описание на модулите
+- **app/models/** – ML логика, потребителски и prediction модели
+- **app/auth/** – Вход, регистрация, смяна на парола
+- **app/main/** – Профил, предсказване, анкети
+- **app/admin/** – Админ панел: всички предсказания, метрики, детайли
+- **app/utils/** – Помощни функции (напр. време/часова зона)
+- **app/templates/** – HTML страници за всички роли
 
-1. Register a new account or log in with existing credentials
-2. Make predictions using the AI model
-3. Take surveys to help improve the system
-4. View your profile and prediction history
-5. Admins can access the dashboard to manage users and view system statistics
+## Предсказване на калории
+Потребителят въвежда:
+- Време на тренировка (минути)
+- Пулс
+- Възраст
+- Тегло
+- Пол
 
-## Contributing
+### Формула за изчисляване
+```
+Изгорени калории = Време (минути) × (MET × 3.5 × Тегло (кг)) / 200
+```
+- **MET** се определя според пулса:
+    - < 100: MET = 3.5 (лека активност)
+    - 100–129: MET = 6 (умерена)
+    - 130+: MET = 8 (интензивна)
 
-1. Fork the repository
-2. Create a new branch for your feature
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+## Какво е MET?
+MET (Metabolic Equivalent of Task) е единица за енергоразход. 1 MET = разхода в покой (~1 kcal/kg/час). По-висок MET = по-интензивна активност.
 
-## License
+## Машинно обучение и метрики
+- Използва се логистична регресия за класификация (над/под 200 калории)
+- Моделът се тренира динамично при всяка заявка за метрики или вероятност, използвайки всички предсказания
+- Метрики:
+    - Logloss (Ентропия)
+    - Precision (Точност)
+    - Recall (Чувствителност)
+    - F1-score
+    - Accuracy (Точност на модела)
+    - Confusion Matrix (Матрица на объркванията)
+- Визуализации: графики на входни данни, резултати, confusion matrix
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## ML Метрики и анализ
-
-В проекта се използва логистична регресия за бинарна класификация (дали изгорените калории са над/под определен праг). Използваните метрики са:
-
-- **Logloss (Entropy):** Мярка за несигурността на модела. По-ниска стойност = по-добър модел.
-- **Precision:** Дял на вярно предсказаните положителни примери от всички предсказани като положителни.
-- **Recall:** Дял на вярно предсказаните положителни примери от всички реално положителни.
-- **F1-Score:** Хармонично средно между precision и recall.
-- **Accuracy:** Дял на вярно предсказаните примери от всички примери.
-- **Confusion Matrix:** Таблица, показваща броя на вярно/невярно класифицираните примери.
-- **Information Gain:** Показва кои входни характеристики носят най-много информация за целта.
-
-### Изводи
-- Метриките позволяват да се оцени качеството на модела и да се изберат най-информативните характеристики.
-- Information gain помага да се оправдае изборът на входни характеристики.
-- Logloss показва доколко моделът е сигурен в предсказанията си.
-
-Всички метрики и анализи са достъпни в админ панела на сайта. 
+## Лиценз
+MIT License

@@ -23,11 +23,4 @@ def calculate_metrics(model, X, y_true):
         'accuracy': accuracy_score(y_true, y_pred),
         'confusion_matrix': confusion_matrix(y_true, y_pred).tolist()
     }
-    return metrics
-
-# Изчислява information gain (mutual information) за всяка характеристика
-def calculate_information_gain(X, y, feature_names=None):
-    info_gain = mutual_info_classif(X, y, discrete_features='auto')
-    if feature_names is not None:
-        return dict(zip(feature_names, info_gain))
-    return info_gain.tolist() 
+    return metrics 

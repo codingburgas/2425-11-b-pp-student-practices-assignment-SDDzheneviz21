@@ -24,6 +24,16 @@ class PredictionForm(FlaskForm):
             DataRequired(),
             NumberRange(min=40, max=200, message="Weight must be between 40 and 200 kg")
         ])
+    height = FloatField('Height (cm)', 
+        validators=[
+            DataRequired(),
+            NumberRange(min=120, max=250, message="Height must be between 120 and 250 cm")
+        ])
+    body_temp = FloatField('Body Temperature (°C)', 
+        validators=[
+            DataRequired(),
+            NumberRange(min=35.0, max=42.0, message="Body temperature must be between 35.0 and 42.0°C")
+        ])
     gender = SelectField('Gender', choices=[('male', 'Male'), ('female', 'Female')], validators=[DataRequired()])
     is_public = BooleanField('Make this prediction public')
     submit = SubmitField('Calculate Calories')

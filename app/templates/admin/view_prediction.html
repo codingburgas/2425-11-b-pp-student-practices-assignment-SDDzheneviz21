@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow mb-4">
+        <div class="card-body">
+          <h2 class="card-title text-center mb-4">Prediction Details</h2>
+          <table class="table table-bordered">
+            <tr><th>ID</th><td>{{ prediction.id }}</td></tr>
+            <tr><th>User</th><td>{{ prediction.user.username }}</td></tr>
+            <tr><th>Date</th><td>{{ (prediction.created_at|to_bulgarian_time).strftime('%Y-%m-%d %H:%M') }}</td></tr>
+            <tr><th>Workout Duration</th><td>{{ prediction.input_data.workout_duration }}</td></tr>
+            <tr><th>Heart Rate</th><td>{{ prediction.input_data.heart_rate }}</td></tr>
+            <tr><th>Age</th><td>{{ prediction.input_data.age }}</td></tr>
+            <tr><th>Weight</th><td>{{ prediction.input_data.weight }}</td></tr>
+            <tr><th>Gender</th><td>{{ prediction.input_data.gender }}</td></tr>
+            <tr><th>Calories Burned</th><td>{{ '%.2f'|format(prediction.prediction_result) }}</td></tr>
+            <tr><th>Public</th><td>{{ 'Yes' if prediction.is_public else 'No' }}</td></tr>
+          </table>
+          <div class="row mt-4 justify-content-center">
+            <div class="col-md-6 mb-4 mb-md-0">
+              {% if diagram_url %}
+              <h5>Input Features Diagram</h5>
+              <img src="{{ diagram_url }}" alt="Input Features Diagram" class="img-fluid" style="max-width:400px;">
+              {% endif %}
+            </div>
+            {% if probability is not none %}
+            <div class="col-md-6">
+              <h5>Probability Output</h5>
+              <div class="mb-2">
+                <span class="fw-bold">Вероятност да изгорите над 200 kcal:</span>
+                <span class="text-primary">{{ (probability*100)|round(1) }}%</span>
+              </div>
+              <div id="probability-bar" style="max-width:400px; margin: 0 auto;"></div>
+              <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+              <script>
+              var proba = {{ probability|tojson }};
+              var data = [{
+                  x: ['> 200 kcal', '≤ 200 kcal'],
+                  y: [proba*100, (1-proba)*100],
+                  type: 'bar',
+                  marker: {color: ['#007bff', '#e0e0e0']}
+              }];
+              var layout = {
+                  title: 'Probability Distribution',
+                  yaxis: {title: 'Probability (%)', range: [0, 100]},
+                  xaxis: {title: ''},
+                  template: 'plotly_white',
+                  margin: { t: 60 }
+              };
+              Plotly.newPlot('probability-bar', data, layout, {displayModeBar: false, responsive: true});
+              </script>
+            </div>
+            {% endif %}
+          </div>
+          <div class="text-center mt-4">
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} 
