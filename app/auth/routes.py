@@ -33,8 +33,7 @@ def register():
         return redirect(url_for('main.index'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        is_admin = form.user_type.data == 'admin'
-        user = User(username=form.username.data, email=form.email.data, is_admin=is_admin)
+        user = User(username=form.username.data, email=form.email.data, is_admin=False)
         user.set_password(form.password.data)
         profile = UserProfile(user=user)
         db.session.add(user)

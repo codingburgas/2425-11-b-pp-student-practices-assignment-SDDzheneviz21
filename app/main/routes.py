@@ -12,7 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from app.models.ml_utils import train_logistic_regression
-from app.models.calorie_model import predict_calories_burned, get_model_feature_importance, initialize_calorie_model
+from app.models.calorie_model import predict_calories_burned, get_model_feature_importance, initialize_calorie_model, get_model_scores
 from datetime import timedelta
 
 @bp.route('/')
@@ -46,6 +46,8 @@ def predict():
     diagram_url = None
     prediction_result = None
     feature_importance = None
+    r2_score = None
+    rmse_score = None
     
     if form.validate_on_submit():
         print('Form validated')
@@ -84,8 +86,11 @@ def predict():
             
             # Get feature importance
             feature_importance = get_model_feature_importance()
+            # Get R^2 and RMSE
+            r2_score, rmse_score = get_model_scores()
             
             print(f'ML Model Calories burned: {prediction_result}')
+            print(f'R^2: {r2_score}, RMSE: {rmse_score}')
             
         except Exception as e:
             print(f'ML model error: {e}')
@@ -158,7 +163,9 @@ def predict():
                              prediction_result=prediction_result, 
                              diagram_url=diagram_url, 
                              probability=probability,
-                             feature_importance=feature_importance)
+                             feature_importance=feature_importance,
+                             r2_score=r2_score,
+                             rmse_score=rmse_score)
     
     print('Rendering predict.html')
     return render_template('main/predict.html', 

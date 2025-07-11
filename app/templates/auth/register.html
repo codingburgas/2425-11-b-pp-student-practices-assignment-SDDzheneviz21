@@ -37,13 +37,6 @@
                         <span class="text-danger">{{ error }}</span>
                         {% endfor %}
                     </div>
-                    <div class="mb-3">
-                        {{ form.user_type.label(class="form-label") }}
-                        {{ form.user_type(class="form-select") }}
-                        {% for error in form.user_type.errors %}
-                        <span class="text-danger">{{ error }}</span>
-                        {% endfor %}
-                    </div>
                     <div class="d-grid">
                         {{ form.submit(class="btn btn-primary") }}
                     </div>

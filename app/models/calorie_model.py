@@ -18,6 +18,8 @@ class CaloriePredictionModel:
         self.model_path = 'app/models/calorie_model.pkl'
         self.scaler_path = 'app/models/calorie_scaler.pkl'
         self.encoder_path = 'app/models/calorie_encoder.pkl'
+        self.r2 = None
+        self.rmse = None
         
     def train_and_save_model(self):
         """
@@ -60,6 +62,8 @@ class CaloriePredictionModel:
         y_pred = self.model.predict(X_test_scaled)
         r2 = r2_score(y_test, y_pred)
         rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+        self.r2 = r2
+        self.rmse = rmse
         
         print(f"Model trained successfully!")
         print(f"R² Score: {r2:.4f}")
@@ -171,6 +175,15 @@ class CaloriePredictionModel:
         
         return sorted_importance
 
+    def get_model_scores(self):
+        """
+        Return the R^2 and RMSE scores for the model
+        """
+        if self.r2 is None or self.rmse is None:
+            # Try to load and retrain if not set
+            self.train_and_save_model()
+        return self.r2, self.rmse
+
 # Global model instance
 calorie_model = CaloriePredictionModel()
 calorie_model.train_and_save_model()
@@ -193,3 +206,9 @@ def get_model_feature_importance():
     Convenience function to get feature importance
     """
     return calorie_model.get_feature_importance() 
+
+def get_model_scores():
+    """
+    Convenience function to get R^2 and RMSE
+    """
+    return calorie_model.get_model_scores() 
